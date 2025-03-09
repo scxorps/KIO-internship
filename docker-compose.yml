@@ -1,0 +1,112 @@
+services:
+  web:
+    build: .
+    container_name: django_app
+    command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+      - redis
+      - elasticsearch
+    environment:
+      - POSTGRES_DB=django_db
+      - POSTGRES_USER=django_user
+      - POSTGRES_PASSWORD=django_password
+      - DEBUG=True
+
+  db:
+    image: postgres:13
+    container_name: postgres_db
+    restart: always
+    environment:
+      POSTGRES_DB: django_db
+      POSTGRES_USER: django_user
+      POSTGRES_PASSWORD: django_password
+    ports:
+      - "5432:5432"  # Optional, for local database access
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:6
+    container_name: redis_cache
+    restart: always
+    ports:
+      - "6379:6379"  # Optional, for debugging Redis connections
+
+  celery:
+    build: .
+    container_name: celery_worker
+    command: celery -A intern worker --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+      - elasticsearch
+    environment:
+      - POSTGRES_DB=django_db
+      - POSTGRES_USER=django_user
+      - POSTGRES_PASSWORD=django_password
+      - DEBUG=True
+
+  celerybeat:
+    build: .
+    container_name: celery_beat
+    command: celery -A intern beat --loglevel=info
+    volumes:
+      - .:/app
+    depends_on:
+      - db
+      - redis
+      - elasticsearch
+    environment:
+      - POSTGRES_DB=django_db
+      - POSTGRES_USER=django_user
+      - POSTGRES_PASSWORD=django_password
+      - DEBUG=True
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.12.2
+    container_name: elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false  # Disable security for local development
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"  # Limit memory usage to 512MB
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:8.12.2
+    container_name: kibana
+    depends_on:
+      - elasticsearch
+    ports:
+      - "5601:5601"
+    environment:
+      - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
+
+  
+  websockets:
+      build: .
+      container_name: django_ws
+      command: daphne -b 0.0.0.0 -p 8001 intern.asgi:application  # WebSockets sur un port différent
+      volumes:
+        - .:/app
+      ports:
+        - "8001:8001"
+      env_file:
+        - .env
+      depends_on:
+        - redis
+        - web
+
+volumes:
+  postgres_data:
+  elasticsearch_data:

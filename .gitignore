@@ -1,0 +1,88 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+venv/
+.env
+*.env
+
+# Django / Python logs
+*.log
+*.pot
+*.pyc
+*.pyo
+*.pyd
+db.sqlite3
+db.sqlite3-journal
+
+# Django settings secrets
+.env
+config/settings/local.py
+config/settings/dev.py
+
+# Media and static files
+/media/
+*/staticfiles/
+*/static/
+
+# Migrations (optional: keep if tracking)
+*/migrations/*.py
+!*/migrations/__init__.py
+
+# IDE / Editor settings
+.vscode/
+.idea/
+*.swp
+*.swo
+*.sublime-workspace
+*.sublime-project
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pytest / coverage reports
+.coverage
+htmlcov/
+*.cover
+nosetests.xml
+coverage.xml
+*.mo
+*.pot
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+.pyre/
+
+# Docker / Deployment
+docker-compose.override.yml
+.envrc
+*.pem
+
+# Celery
+celerybeat-schedule
+*.pid
+
+
+# Miscellaneous
+*.class
+*.log
+*.pyc
+*.swp
+.DS_Store
+.atom/
+.buildlog/
+.history
+.svn/
+migrate_working_dir/
+
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# VS Code which you may wish to be included in version control, so this line
+# is commented out by default.
+#.vscode/
+
+
+

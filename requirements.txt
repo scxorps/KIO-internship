@@ -1,0 +1,71 @@
+# Django & DRF
+django
+djangorestframework
+
+# PostgreSQL database adapter
+psycopg2-binary
+
+# Redis (for caching & Celery)
+redis
+
+# Celery (for background tasks)
+celery
+django-celery-beat
+
+# Elasticsearch (for search functionality)
+django-elasticsearch-dsl==7.4.0
+# django-elasticsearch-dsl-drf
+
+
+# Backblaze B2 storage
+django-storages[boto3]
+
+# OAuth2 authentication
+django-oauth-toolkit
+
+#django braces
+django-braces
+
+#pagination
+# django-rest-framework-pagination
+
+#filtering
+django-filter
+
+#storage
+django-storages[b2]
+django-storages[s3]
+
+
+#backblaze
+django-Backblaze-b2
+
+#boto3
+boto3==1.28.0
+
+#pillow
+pillow
+
+#async
+asyncssh
+
+
+#drf-spectacular
+drf-spectacular 
+drf-spectacular-sidecar
+
+#dotenv
+python-dotenv
+
+#graphql
+graphene-django
+
+#websocket 
+channels
+channels-redis
+
+#daphne for websocket
+daphne
+
+#websocket
+websocat
