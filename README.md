@@ -4,9 +4,13 @@ This project is a backend system designed during my internship, focusing on buil
 
 # features
 users crud
+
 products/products-details crud 
+
 product media crud
+
 collections/collections-details crud 
+
 
 # Technologies Used
 
