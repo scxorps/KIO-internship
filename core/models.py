@@ -13,7 +13,6 @@ import re
 class User(AbstractUser):
     email = models.EmailField(unique=True, blank=False,max_length=255)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
-    
     def clean(self):
         pattern=r"^\+\d{1,3}[-\s]?\d{9}$"
         if not re.match(pattern,self.phone_number):
