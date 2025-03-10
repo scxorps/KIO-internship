@@ -2,7 +2,6 @@ from django.db import IntegrityError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from core.models import User
 from django.shortcuts import get_object_or_404
 from core.documents import ProductDocument
 from core.models import Collection,Product,ProductMedia
@@ -11,6 +10,10 @@ from rest_framework.permissions import AllowAny
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.pagination import PageNumberPagination
 from .tasks import check_stock
+from core.models import User
+
+
+
 
 
 
@@ -23,6 +26,7 @@ class UserCreate(APIView):
         serializer = self.serializer_class(data=request.data)
         if serializer.is_valid():
             serializer.save()
+            print("user created,",serializer.data)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

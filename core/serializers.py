@@ -1,33 +1,32 @@
-from core.models import User
 from django.db import IntegrityError
 from django.utils.text import slugify
 from rest_framework import serializers
-from django.contrib.auth.models import User
 from .models import Product, Collection, ProductMedia
-from django.contrib.auth.models import User
-from rest_framework import serializers
 import re
-
+from core.models import User
 
 
 class UserSerializer(serializers.ModelSerializer):
-    phone_number=serializers.CharField(max_length=15)
+    phone_number = serializers.CharField(max_length=15, required=False, allow_null=True)
+    password = serializers.CharField(write_only=True)  # Hide password from responses
+
     class Meta:
-        model = User
-        fields = ('username', 'password','is_staff','is_superuser','email','phone_number')
-        
+        model = User  
+        fields = ("username", "password", "email", "phone_number", "is_staff", "is_superuser")
+
+
     def validate_phone_number(self, value):
-        try:
-            pattern = r"^\+\d{1,3}[-\s]\d{9}$"
-            if not re.match(pattern, value):
-               raise serializers.ValidationError("Invalid phone number format")
-            else:
-                if User.objects.filter(phone_number=value).exclude(id=self.instance.id if self.instance else None).exists():
-                    raise serializers.ValidationError("Phone number already exists")
-                else:
-                    return value
-        except ValueError:
-            raise serializers.ValidationError("Phone number must be a valid integer")
+        """Validate phone number format and uniqueness."""
+        pattern = r"^\+\d{1,3}[-\s]?\d{7,14}$"
+        if not re.match(pattern, value):
+            raise serializers.ValidationError("Invalid phone number format")
+        
+        # Check uniqueness
+        if User.objects.filter(phone_number=value).exclude(id=self.instance.id if self.instance else None).exists():
+            raise serializers.ValidationError("Phone number already exists")
+        
+        return value
+
         
         
 
