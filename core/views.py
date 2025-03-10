@@ -2,7 +2,7 @@ from django.db import IntegrityError
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from django.contrib.auth.models import User
+from core.models import User
 from django.shortcuts import get_object_or_404
 from core.documents import ProductDocument
 from core.models import Collection, Product, ProductMedia
@@ -17,9 +17,6 @@ from drf_spectacular.utils import extend_schema, OpenApiParameter
 
 
 
-
-
-User = get_user_model()
 
 
 
@@ -88,22 +85,8 @@ class ProductDetailAPIView(APIView):
 
     def put(self, request, slug):
         product = self.get_object(slug, request.user)
-        
-        # Get the existing name of the product
-        old_name = product.name
-        
-        # Get the new name from request data (if provided)
-        new_name = request.data.get("name")
-       
-        # If the name remains unchanged, exclude it from validation
-        if new_name == old_name:
-            request_data = request.data.copy()  # Copy data to modify safely
-            request_data.pop("name", None)  # Remove the name field
-            
-        
-            serializer = self.serializer_class(product, data=request_data, partial=True)
-        else:
-            serializer = self.serializer_class(product, data=request.data, partial=True)
+                
+        serializer = self.serializer_class(product, data=request.data, partial=True, context = {'user': request.user})
 
         if serializer.is_valid():
             try:
@@ -155,8 +138,6 @@ class ProductListCreateAPIView(APIView):
                 name=clean_query  # Allows partial matches like "moh"
             )
 
-
-
             try:
                 response = search.execute()
                 product_ids = [int(hit.meta.id) for hit in response]
@@ -175,8 +156,6 @@ class ProductListCreateAPIView(APIView):
         result_page = paginator.paginate_queryset(qs, request)
         serializer = self.serializer_class(result_page, many=True)
         return paginator.get_paginated_response(serializer.data)
-
-    
     
 
     def post(self,request):
@@ -191,7 +170,6 @@ class ProductListCreateAPIView(APIView):
                 created_products=Product.objects.bulk_create(products)
                 return Response(self.serializer_class(created_products, many=True).data,status=status.HTTP_201_CREATED)
             return Response(serializer.errors,status=status.HTTP_400_BAD_REQUEST)
-        
         else:
             serializer = self.serializer_class(data=request.data, context={'user': request.user})
             if serializer.is_valid():
@@ -213,7 +191,7 @@ class CollectionListCreateAPIView(APIView):
 
     def post(self, request):
         """Create a collection and assign it to the authenticated user"""
-        serializer = self.serializer_class(data=request.data, context={'request': request})  # Pass request context
+        serializer = self.serializer_class(data=request.data, context={'user': request.user,"request":request})  # Pass request context
         if serializer.is_valid():
             serializer.save(user=request.user)  # Automatically assign user
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -240,7 +218,7 @@ class CollectionDetailAPIView(APIView):
     def put(self, request, slug):
         """Update a collection"""
         collection = self.get_object(slug, request.user)  # Ensure only owner can update
-        serializer = self.serializer_class(collection, data=request.data, partial=True, context={'request': request})  # ✅ Pass context
+        serializer = self.serializer_class(collection, data=request.data, partial=True, context={'user': request.user,"request":request})
         if serializer.is_valid():
             serializer.save(user=request.user)  # ✅ Ensure user remains the same
             return Response(serializer.data)
@@ -278,6 +256,7 @@ class ProductMediaAPIView(APIView):
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def post(self, request):
+        print(request.data)
         """Upload a new media file for a product"""
         serializer = self.serializer_class(data=request.data, context={'request': request})
         if serializer.is_valid():

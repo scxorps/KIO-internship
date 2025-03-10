@@ -36,13 +36,13 @@ class Product(models.Model):
     slug = models.SlugField(null=True,blank=True)
     
     def save(self,*args,**kwargs):
-        self.slug = (self.name)
+        self.slug = slugify(self.name)
         super(Product,self).save(*args,**kwargs)
     
     
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['user', 'name'], name='unique_product_per_user')
+            models.UniqueConstraint(fields=['user', 'slug'], name='unique_product_per_user')
         ]
     
     @property
@@ -58,12 +58,12 @@ class ProductMedia(models.Model):
     product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='media')
     image_url = models.ImageField(upload_to='products', null=False, blank=False)
 
-    def delete(self, *args, **kwargs):
-        """Ensure file is deleted from storage when model instance is deleted"""
-        storage = self.image_url.storage
-        if storage.exists(self.image_url.name):
-            storage.delete(self.image_url.name)  # ✅ Remove file from S3
-        super().delete(*args, **kwargs)
+    # def delete(self, *args, **kwargs):
+    #     """Ensure file is deleted from storage when model instance is deleted"""
+    #     storage = self.image_url.storage
+    #     if storage.exists(self.image_url.name):
+    #         storage.delete(self.image_url.name)  # ✅ Remove file from S3
+    #     super().delete(*args, **kwargs)
 
     def __str__(self):
         return self.product.name 
@@ -76,12 +76,12 @@ class Collection(models.Model):
     slug = models.SlugField(null=True,blank=True)
     
     def save(self,*args,**kwargs):
-        self.slug = (self.name)
+        self.slug = slugify(self.name)
         super(Collection,self).save(*args,**kwargs)
 
     class Meta:
         constraints = [
-            models.UniqueConstraint(fields=['name', 'user'], name='unique_collection_per_user')
+            models.UniqueConstraint(fields=['slug', 'user'], name='unique_collection_per_user')
         ]
 
     def __str__(self):

@@ -1,5 +1,6 @@
 import re
 from django.db import IntegrityError
+from django.utils.text import slugify
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Product, Collection, ProductMedia
@@ -35,8 +36,8 @@ class UserSerializer(serializers.ModelSerializer):
 
 
 class ProductSerializer(serializers.ModelSerializer):
-    product_id = serializers.IntegerField(source="id", read_only=True)  # Rename id → product_id
-    user_id = serializers.IntegerField(source="user.id", read_only=True)  # Rename user → user_id
+    product_id = serializers.IntegerField(source="id", read_only=True) 
+    user_id = serializers.IntegerField(source="user.id", read_only=True)  
 
     class Meta:
         model = Product
@@ -46,6 +47,23 @@ class ProductSerializer(serializers.ModelSerializer):
             'price': {'required': False},
             'stock': {'required': False}
         }
+    def validate(self,data):
+        user_id = self.context['user'].id 
+        instance=self.instance
+        if data.get('name') is None:
+            slug=slugify(instance.name)
+        else:
+            slug=slugify(data['name'])
+        
+        if Product.objects.filter(slug=slug,user_id=user_id).exclude(id=instance.id if instance else None).exists():
+            raise serializers.ValidationError({"name":"A product with this name already exists for this user."})
+        data['slug']=slug
+        return data
+    
+    def validate_name(self,value):
+        #regular expression to check if the name is valid
+        if not re.match(r"^[A-Za-z0-9_]*$", value):
+            raise serializers.ValidationError("Name must be alphanumeric")
 
 
 class ProductMediaSerializer(serializers.ModelSerializer):
@@ -63,6 +81,18 @@ class CollectionSerializer(serializers.ModelSerializer):
     class Meta:
         model = Collection
         fields = ['id', 'name', 'description', 'products']
+        
+    def validate(self,data):
+        user_id = self.context['user'].id
+        instance=self.instance
+        if data.get('name') is None:
+            slug=slugify(instance.name)
+        else:
+            slug=slugify(data['name'])
+        if Collection.objects.filter(name=slug,user_id=user_id).exclude(id=instance.id if instance else None).exists():
+            raise serializers.ValidationError({"name":"A collection with this name already exists for this user."})
+        data['slug']=slug
+        return data
 
     def create(self, validated_data):
         """Automatically assign the authenticated user to the collection"""
