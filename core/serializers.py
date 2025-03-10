@@ -1,4 +1,4 @@
-import re
+from core.models import User
 from django.db import IntegrityError
 from django.utils.text import slugify
 from rest_framework import serializers
@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from .models import Product, Collection, ProductMedia
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from core.models import User
+import re
 
 
 
@@ -41,7 +41,7 @@ class ProductSerializer(serializers.ModelSerializer):
         model = Product
         fields = ['product_id', 'user_id', 'name', 'description', 'price', 'stock']
         extra_kwargs = {
-            'description': {'required': False},  # Make optional
+            'description': {'required': False}, 
             'price': {'required': False},
             'stock': {'required': False}
         }
@@ -102,7 +102,6 @@ class CollectionSerializer(serializers.ModelSerializer):
         products_data = validated_data.pop('products', [])
         product_names = [product['name'] for product in products_data]
 
-        # Check if a collection with the same name already exists for this user
         if Collection.objects.filter(name=validated_data['name'], user=request.user).exists():
             raise serializers.ValidationError({"name": "You already have a collection with this name."})
 

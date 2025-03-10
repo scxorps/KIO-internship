@@ -5,8 +5,8 @@ from rest_framework import status
 from core.models import User
 from django.shortcuts import get_object_or_404
 from core.documents import ProductDocument
-from core.models import Collection, Product, ProductMedia
-from .serializers import CollectionSerializer, ProductMediaSerializer, ProductSerializer,  UserSerializer
+from core.models import Collection,Product,ProductMedia
+from .serializers import CollectionSerializer,ProductMediaSerializer,ProductSerializer,UserSerializer
 from rest_framework.permissions import AllowAny
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.pagination import PageNumberPagination
@@ -14,11 +14,9 @@ from .tasks import check_stock
 
 
 
-
-
 #signup user with classic method
 class UserCreate(APIView):
-    permission_classes = [AllowAny] # Allow anyone to access this endpoint
+    permission_classes = [AllowAny]
     serializer_class = UserSerializer
 
     def post(self, request):
@@ -27,7 +25,6 @@ class UserCreate(APIView):
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
 
 
 
@@ -79,18 +76,14 @@ class ProductDetailAPIView(APIView):
     
 
     def put(self, request, slug):
-        product = self.get_object(slug, request.user)
-                
+        product = self.get_object(slug, request.user)       
         serializer = self.serializer_class(product, data=request.data, partial=True, context = {'user': request.user})
-
         if serializer.is_valid():
             try:
-                prod = serializer.save()
-                
+                prod = serializer.save() 
                 # Check for low stock after saving
                 if prod.stock == 0:
                     check_stock.delay()
-                    
                 return Response(serializer.data)
             except IntegrityError:
                 return Response({"error": "You already have a product with this name."}, status=status.HTTP_400_BAD_REQUEST)

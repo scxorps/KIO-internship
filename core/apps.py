@@ -6,5 +6,5 @@ class CoreConfig(AppConfig):
     name = 'core'
 
     def ready(self):
-        import core.signals  # ✅ Ensure signals are registered
-        import core.documents  # ✅ Ensure documents are registered
+        import core.signals  
+        import core.documents  

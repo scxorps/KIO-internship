@@ -5,8 +5,6 @@ from .views import ( CollectionDetailAPIView,
                     ProductMediaDetailsAPIView, UserCreate,UserDetails,
                     ProductDetailAPIView, ProductListCreateAPIView)
 
-
-
 urlpatterns = [
     path('signup/', UserCreate.as_view(), name='user-signup'),
     path('userdetails/', UserDetails.as_view(), name='user-details'),
