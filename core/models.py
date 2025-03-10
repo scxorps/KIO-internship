@@ -1,6 +1,4 @@
 from django.db import models
-
-# Create your models here.
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.text import slugify
@@ -9,10 +7,10 @@ import re
 
 
 # Create your models here.
-    
 class User(AbstractUser):
     email = models.EmailField(unique=True, blank=False,max_length=255)
     phone_number = models.CharField(max_length=15, blank=True, null=True)
+    
     def clean(self):
         pattern=r"^\+\d{1,3}[-\s]?\d{9}$"
         if not re.match(pattern,self.phone_number):
@@ -27,6 +25,7 @@ class User(AbstractUser):
             self.set_password(self.password)
         super().save(*args, **kwargs)
 
+
 class Product(models.Model):
     name = models.CharField(max_length=255)
     description = models.TextField()
@@ -38,7 +37,6 @@ class Product(models.Model):
     def save(self,*args,**kwargs):
         self.slug = slugify(self.name)
         super(Product,self).save(*args,**kwargs)
-    
     
     class Meta:
         constraints = [
@@ -57,16 +55,10 @@ class Product(models.Model):
 class ProductMedia(models.Model):
     product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='media')
     image_url = models.ImageField(upload_to='products', null=False, blank=False)
-
-    # def delete(self, *args, **kwargs):
-    #     """Ensure file is deleted from storage when model instance is deleted"""
-    #     storage = self.image_url.storage
-    #     if storage.exists(self.image_url.name):
-    #         storage.delete(self.image_url.name)  # ✅ Remove file from S3
-    #     super().delete(*args, **kwargs)
-
+    
     def __str__(self):
         return self.product.name 
+
 
 class Collection(models.Model):
     name = models.CharField(max_length=255)

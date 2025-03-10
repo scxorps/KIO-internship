@@ -8,14 +8,9 @@ from core.documents import ProductDocument
 from core.models import Collection, Product, ProductMedia
 from .serializers import CollectionSerializer, ProductMediaSerializer, ProductSerializer,  UserSerializer
 from rest_framework.permissions import AllowAny
-from django.contrib.auth import get_user_model
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.pagination import PageNumberPagination
 from .tasks import check_stock
-from drf_spectacular.utils import extend_schema, OpenApiParameter
-
-
-
 
 
 
@@ -64,7 +59,7 @@ class UserDetails(APIView):
   
   
   
-  
+
   
 
     
@@ -181,7 +176,6 @@ class ProductListCreateAPIView(APIView):
     
     
 class CollectionListCreateAPIView(APIView):
-
     serializer_class = CollectionSerializer
     def get(self, request):
         """Retrieve only collections created by the logged-in user"""
@@ -196,9 +190,6 @@ class CollectionListCreateAPIView(APIView):
             serializer.save(user=request.user)  # Automatically assign user
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    
-    
     
     
     

@@ -6,11 +6,9 @@ from django.contrib.auth.models import User
 from .models import Product, Collection, ProductMedia
 from django.contrib.auth.models import User
 from rest_framework import serializers
+from core.models import User
 
 
-from django.contrib.auth import get_user_model
-
-User = get_user_model()
 
 class UserSerializer(serializers.ModelSerializer):
     phone_number=serializers.CharField(max_length=15)
@@ -47,6 +45,7 @@ class ProductSerializer(serializers.ModelSerializer):
             'price': {'required': False},
             'stock': {'required': False}
         }
+        
     def validate(self,data):
         user_id = self.context['user'].id 
         instance=self.instance

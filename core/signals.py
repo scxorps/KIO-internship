@@ -1,26 +1,17 @@
 # signals.py
-from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.mail import send_mail
-from django.contrib.auth import get_user_model
 from django.conf import settings
 from django.db.models.signals import post_delete
-from django.dispatch import receiver
-
+from django.db.models.signals import post_save
+from core.models import User
 from core.documents import ProductDocument
 from .models import Product, ProductMedia
+import boto3
 
-from core.models import ProductMedia
 
-User = get_user_model()
 
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-from django.core.mail import send_mail
-from django.conf import settings
-from django.contrib.auth import get_user_model
 
-User = get_user_model()
 
 @receiver(post_save, sender=User)
 def send_welcome_email(sender, instance, created, **kwargs):
@@ -40,11 +31,6 @@ def send_welcome_email(sender, instance, created, **kwargs):
         
 
 
-import boto3
-from django.conf import settings
-from django.db.models.signals import post_delete
-from django.dispatch import receiver
-from core.models import ProductMedia
 
 @receiver(post_delete, sender=ProductMedia)
 def delete_image_on_s3(sender, instance, **kwargs):
@@ -87,7 +73,4 @@ def update_elasticsearch_on_save(sender, instance, **kwargs):
     """Sync product changes to Elasticsearch on save."""
     ProductDocument().update(instance)
 
-# @receiver(post_delete, sender=Product)
-# def delete_elasticsearch_on_delete(sender, instance, **kwargs):
-#     """Remove product from Elasticsearch on delete."""
-#     ProductDocument().delete(instance)
+
